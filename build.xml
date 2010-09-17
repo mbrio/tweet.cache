@@ -1,0 +1,68 @@
+<project name="tweet.cache" default="all" basedir=".">
+
+	<loadfile property="version" srcfile="VERSION" />
+	<property name="PREFIX" value="." />
+	<property name="dist" value="${PREFIX}/dist" />
+	<property name="site" value="${PREFIX}/site" />
+	<property name="site_js" value="${PREFIX}/site/js" />
+	
+	<property name="OUTPUT" value="${dist}/tweet.cache.js" />
+	<property name="OUTPUT_MIN" value="${dist}/tweet.cache.min.js" />
+	<property name="OUTPUT_SITE" value="${site_js}/script.js" />
+	
+	<target name="all" depends="tweet-cache,tweet-cache-lint,tweet-cache-min" />
+
+	<target name="tweet-cache">
+		<mkdir dir="${dist}" />
+		<concat destfile="${OUTPUT}">
+			<fileset file="src/intro.js" />
+			<fileset file="src/core.js" />
+			<fileset file="src/outro.js" />
+		</concat>
+		<replaceregexp match="@VERSION" replace="${version}" flags="g" byline="true" file="${OUTPUT}" />
+		<exec executable="git" outputproperty="date">
+			<arg line="log -1 --pretty=format:%ad" />
+		</exec>
+		<replaceregexp match="Date: " replace="Date: ${date}" file="${OUTPUT}" />
+		<echo message="${OUTPUT} built." />
+	</target>
+	
+	<target name="tweet-cache-lint" depends="tweet-cache">
+		<exec executable="java">
+			<arg line="-jar build/js.jar build/jslint-check.js" />
+		</exec>
+	</target>
+
+	<target name="tweet-cache-min" depends="tweet-cache">
+		<apply executable="java" parallel="false" verbose="true" dest="${dist}">
+			<fileset dir="${dist}">
+				<include name="tweet.cache.js" />
+			</fileset>
+			<arg line="-jar" />
+			<arg path="build/google-compiler-20100616.jar" />
+			<arg value="--warning_level" />
+			<arg value="QUIET" />
+			<arg value="--js_output_file" />
+			<targetfile />
+			<arg value="--js" />
+			<mapper type="glob" from="tweet.cache.js" to="tmpmin" />
+		</apply>
+		<concat destfile="${OUTPUT_MIN}">
+			<filelist files="${OUTPUT}, ${dist}/tmpmin" />
+			<filterchain>
+				<headfilter lines="6" />
+			</filterchain>
+		</concat>
+		<concat destfile="${OUTPUT_MIN}" append="yes">
+			<filelist files="${dist}/tmpmin" />
+		</concat>
+		<copy file="${OUTPUT_MIN}" tofile="${OUTPUT_SITE}" overwrite="true" />
+		<delete file="${dist}/tmpmin" />
+		<echo message="${OUTPUT_MIN} built." />
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist}" />
+	</target>
+
+</project>
