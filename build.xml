@@ -50,7 +50,7 @@
 		<concat destfile="${OUTPUT_MIN}">
 			<filelist files="${OUTPUT}, ${dist}/tmpmin" />
 			<filterchain>
-				<headfilter lines="6" />
+				<headfilter lines="9" />
 			</filterchain>
 		</concat>
 		<concat destfile="${OUTPUT_MIN}" append="yes">
