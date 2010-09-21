@@ -1,2 +1,2 @@
 
-})(jQuery, window);
+})(jQuery, Mustache, window);

@@ -7,5 +7,5 @@
  *
  * Date: 
  */
-(function($, window, undefined) {
+;(function($, $m, window, undefined) {
 	

@@ -5,10 +5,12 @@
  * Copyright (c) 2010 Michael Diolosa - http://github.com/mbrio
  * Dual-licensed under the GPL and MIT licenses.
  *
- * Date: Thu Sep 16 22:13:51 2010 -0400
+ * Date: Fri Sep 17 00:00:51 2010 -0400
  */
-(function($, window, undefined) {
-		var TEMPLATES = {};
+;(function($, $m, window, undefined) {
+		
+	var TEMPLATE_IFRAME = "<iframe src=\"{{href}}\" style=\"display:none\"></iframe>"
+	
 	var URL_GET_FAVORITES = 'http://api.twitter.com/1/favorites/${name}.json?include_entities=1&callback=?';
 	
 	var TweetCache = function(params) {
@@ -19,9 +21,7 @@
 		}
 		
 		this.params_ = $.extend({
-			username: '',
-			success: function(){},
-			failure: function(){}
+			username: ''
 		}, params);
 		
 		this.url_ = URL_GET_FAVORITES.replace(/\$\{name\}/i, this.params_.username);
@@ -30,24 +30,15 @@
 
 	TweetCache.version = '0.1.0';
 	
-	var page_cache_success_ = function(data) {
-		var results = data.results || data;
-		
-		this.cache.push(results);
-	}
-	
-	var page_cache_failure_ = function() {
-	}
-	
 	var link_found_ = function(text, href) {
 		if(href === undefined) return;
-		$.ajax({
-			url: href,
-			dataType: 'html',
-			context: this,
-			success: page_cache_success_,
-			error: page_cache_failure_
-		})
+		
+		var iframe = $($m.to_html(TEMPLATE_IFRAME, {href:href}));
+		iframe.load(function() {
+			console.log(this.contentDocument);
+		});
+		
+		$(document.body).prepend(iframe);
 	}
 	
 	var favorites_success_ = function(data) {
@@ -81,4 +72,4 @@
 
 	window.TweetCache = TweetCache;
 
-})(jQuery, window);
+})(jQuery, Mustache, window);
